@@ -28,7 +28,7 @@ jobs:
     strategy:
       matrix:
         service: [proxy, agent]
-        os: [linux, darwin, windows]
+        os: [linux, darwin]
         arch: [amd64, arm64]
 
     steps:
@@ -68,9 +68,6 @@ jobs:
           TIME=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
 
           BINARY_NAME=cube-${{ matrix.service }}
-          if [ "${{ matrix.os }}" = "windows" ]; then
-            BINARY_NAME="${BINARY_NAME}.exe"
-          fi
 
           go build -ldflags "-s -w \
             -X 'github.com/absmach/supermq.BuildTime=${TIME}' \
@@ -80,13 +77,8 @@ jobs:
 
           # Create archive
           ARCHIVE_NAME=cube-${{ matrix.service }}_${{ steps.version.outputs.version }}_${{ matrix.os }}_${{ matrix.arch }}
-          if [ "${{ matrix.os }}" = "windows" ]; then
-            zip ${ARCHIVE_NAME}.zip ${BINARY_NAME}
-            echo "artifact=${ARCHIVE_NAME}.zip" >> $GITHUB_OUTPUT
-          else
-            tar -czvf ${ARCHIVE_NAME}.tar.gz ${BINARY_NAME}
-            echo "artifact=${ARCHIVE_NAME}.tar.gz" >> $GITHUB_OUTPUT
-          fi
+          tar -czvf ${ARCHIVE_NAME}.tar.gz ${BINARY_NAME}
+          echo "artifact=${ARCHIVE_NAME}.tar.gz" >> $GITHUB_OUTPUT
         id: build
 
       - name: Upload artifact
@@ -111,7 +103,7 @@ jobs:
       - name: Generate checksums
         run: |
           cd artifacts
-          find . -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec sha256sum {} \; | sed 's|./[^/]*/||' > checksums.txt
+          find . -type f -name "*.tar.gz" -exec sha256sum {} \; | sed 's|./[^/]*/||' > checksums.txt
           cat checksums.txt
 
       - name: Upload checksums artifact
