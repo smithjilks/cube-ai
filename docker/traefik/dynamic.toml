@@ -6,17 +6,17 @@
 
 # HTTP Routers - HTTPS (Production)
 [http.routers.cube-ui]
-  rule = "Host(`__CUBE_DOMAIN__`)"
+  rule = "Host(`localhost`)"
   entrypoints = ["websecure"]
   service = "cube-ui"
   priority = 1
   [http.routers.cube-ui.tls]
     certResolver = "letsEncrypt"
     [[http.routers.cube-ui.tls.domains]]
-      main = "__CUBE_DOMAIN__"
+      main = "localhost"
 
 [http.routers.cube-proxy]
-  rule = "Host(`__CUBE_DOMAIN__`) && PathPrefix(`/proxy`)"
+  rule = "Host(`localhost`) && PathPrefix(`/proxy`)"
   entrypoints = ["websecure"]
   service = "cube-proxy"
   priority = 2
